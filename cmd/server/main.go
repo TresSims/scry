@@ -58,5 +58,5 @@ func main() {
 }
 
 func initTui(ssh.Session) (tea.Model, []tea.ProgramOption) {
-	return tui.Model{}, []tea.ProgramOption{}
+	return tui.New(tui.AsServer), []tea.ProgramOption{}
 }
