@@ -5,6 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/TresSims/scry/facts"
 	"github.com/TresSims/scry/scry"
 	"github.com/TresSims/scry/tui/styles"
 )
@@ -26,6 +27,9 @@ type Model struct {
 
 	// the default stlye
 	style lipgloss.Style
+
+	// the fact engine
+	Engine *facts.Engine
 }
 
 type Option func(*Model)
@@ -51,6 +55,12 @@ func AsClient(m *Model) {
 
 func AsServer(m *Model) {
 	m.mode = scry.Server
+}
+
+func WithEngine(e *facts.Engine) Option {
+	return func(m *Model) {
+		m.Engine = e
+	}
 }
 
 func (_ Model) Init() tea.Cmd {

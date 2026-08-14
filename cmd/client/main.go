@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 
 	tea "charm.land/bubbletea/v2"
@@ -11,23 +12,27 @@ import (
 )
 
 func main() {
-	p := tea.NewProgram(tui.New(
-		tui.AsClient,
-		tui.MainTab{}.Load,
-		tui.MainTab{}.Load,
-	))
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	e := facts.Engine{
+	e := &facts.Engine{
 		Data: map[string]facts.Fact{
 			"hostname": {
 				Facter: func() (any, error) { return os.Hostname() },
 			},
+			"count": {
+				Facter: func() (any, error) { return rand.Int(), nil },
+			},
 		},
 	}
 	go e.Collect(ctx)
+
+	p := tea.NewProgram(tui.New(
+		tui.AsClient,
+		tui.WithEngine(e),
+		(&tui.MainTab{}).Load,
+		(&tui.MainTab{}).Load,
+	))
 
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Critical error starting scry: %v", err)

@@ -33,7 +33,7 @@ func (e *Engine) Collect(ctx context.Context) {
 func (e *Engine) runCollection() {
 	var wg sync.WaitGroup
 
-	for _, f := range e.Data {
+	for k, f := range e.Data {
 		wg.Go(func() {
 			val, err := f.Facter()
 			if err != nil {
@@ -44,6 +44,7 @@ func (e *Engine) runCollection() {
 			defer e.mux.Unlock()
 
 			f.Cache = val
+			e.Data[k] = f
 		})
 	}
 
