@@ -5,7 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/TresSims/scry/internal/tui/styles"
+	"github.com/TresSims/scry/tui/styles"
 )
 
 type Mode int

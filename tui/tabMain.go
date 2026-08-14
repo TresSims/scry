@@ -6,7 +6,7 @@ import "charm.land/lipgloss/v2"
 type MainTab struct {
 }
 
-func WithMainTab(m *Model) {
+func (t MainTab) Load(m *Model) {
 	m.tabs = append(m.tabs, MainTab{})
 }
 
