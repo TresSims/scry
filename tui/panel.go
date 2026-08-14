@@ -5,14 +5,8 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/TresSims/scry/scry"
 	"github.com/TresSims/scry/tui/styles"
-)
-
-type Mode int
-
-const (
-	Client Mode = iota
-	Server
 )
 
 // [Model] implements [tea.Model]
@@ -25,7 +19,7 @@ type Model struct {
 
 	// client or server mode, effectively whether to fetch data from the
 	// local machine or a remote one
-	mode Mode
+	mode scry.Mode
 
 	// tabs has a list of tabs that can be rendered
 	tabs []Tab
@@ -52,11 +46,11 @@ func New(opts ...Option) *Model {
 }
 
 func AsClient(m *Model) {
-	m.mode = Client
+	m.mode = scry.Client
 }
 
 func AsServer(m *Model) {
-	m.mode = Server
+	m.mode = scry.Server
 }
 
 func (_ Model) Init() tea.Cmd {
