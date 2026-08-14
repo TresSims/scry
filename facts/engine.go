@@ -1,23 +1,49 @@
 package facts
 
-import "sync"
+import (
+	"context"
+	"sync"
+	"time"
+)
 
 // Engine contains mirrored string maps, one for [Facter]s that collect system info
 // and one that caches the results
 type Engine struct {
-	// Facts are functions to run to collect system facts
-	Facts map[string]Facter
+	// Data is a map of fact results for quick access
+	Data map[string]Fact
 
-	// Cache is a map of fact results for quick access
-	Cache map[string]any
+	mux sync.Mutex
 }
 
-func (e Engine) Collect() {
+func (e *Engine) Collect(ctx context.Context) {
+	e.runCollection()
+	ticker := time.NewTicker(5 * time.Second)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+
+		case <-ticker.C:
+			e.runCollection()
+		}
+	}
+}
+
+func (e *Engine) runCollection() {
 	var wg sync.WaitGroup
 
-	for k, v := range e.Facts {
+	for _, f := range e.Data {
 		wg.Go(func() {
-			e.Cache[k] = v.Get()
+			val, err := f.Facter()
+			if err != nil {
+				return
+			}
+
+			e.mux.Lock()
+			defer e.mux.Unlock()
+
+			f.Cache = val
 		})
 	}
 
