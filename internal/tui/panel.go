@@ -1,8 +1,11 @@
 package tui
 
 import (
+	"strings"
+
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/TresSims/scry/internal/tui/styles"
 )
 
 type Mode int
@@ -43,8 +46,7 @@ func New(opts ...Option) *Model {
 	model.t = 0
 
 	model.style = lipgloss.NewStyle().
-		Foreground(lipgloss.White).
-		Background(lipgloss.Black)
+		Foreground(lipgloss.White)
 
 	return model
 }
@@ -91,33 +93,45 @@ func (m Model) View() tea.View {
 	headerHeight := lipgloss.Height(header)
 
 	tab := m.tabs[m.t].Render(m.w, m.h-headerHeight, m.style)
-	tabHeight := lipgloss.Height(tab)
 
-	// the tab should fill the hight, but we pad it out here just in case
-	spacer := m.style.Height(m.h - headerHeight - tabHeight).Render()
+	v := tea.NewView(lipgloss.JoinVertical(lipgloss.Top, header, tab))
 
-	return tea.NewView(lipgloss.JoinVertical(lipgloss.Top, header, tab, spacer))
+	v.AltScreen = true
+
+	return v
 }
 
 func (m Model) renderHeader() string {
 	tabStyle := m.style.
-		Padding(2).
-		Border(lipgloss.RoundedBorder())
+		Border(styles.Tab).
+		Padding(0, 1, 0)
 
-	primaryTabStyle := tabStyle.BorderBottom(false).
+	primaryTabStyle := tabStyle.Border(styles.ActiveTab).
 		Foreground(lipgloss.Blue)
 
-	renderedTabs := []string{}
+	tabGapStyle := tabStyle.
+		BorderTop(false).
+		BorderLeft(false).
+		BorderRight(false)
+
+	tabList := []string{}
 
 	for i, tab := range m.tabs {
 		if i == m.t {
-			renderedTabs = append(renderedTabs, primaryTabStyle.Render(tab.Name()))
+			tabList = append(tabList, primaryTabStyle.Render(tab.Name()))
 
 			continue
 		}
 
-		renderedTabs = append(renderedTabs, tabStyle.Render(tab.Name()))
+		tabList = append(tabList, tabStyle.Render(tab.Name()))
 	}
 
-	return lipgloss.JoinHorizontal(0.2, renderedTabs...)
+	tabs := lipgloss.JoinHorizontal(lipgloss.Left, tabList...)
+	tabsWidth := lipgloss.Width(tabs)
+	tabsHeight := lipgloss.Height(tabs)
+
+	gap := tabGapStyle.Height(tabsHeight).
+		Render(strings.Repeat(" ", max(0, m.w-tabsWidth)))
+
+	return lipgloss.JoinHorizontal(lipgloss.Left, tabs, gap)
 }
