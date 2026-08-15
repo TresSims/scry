@@ -1,4 +1,3 @@
-
 # gowatch.yml configuration example
 
 # The name of the executable file generated under the current directory execution. The default is the current directory name.
@@ -6,9 +5,9 @@
 
 # Specify the command to run after builds done
 # run_cmd: "./run.sh"
- 
+
 # Specify the directory where the compiled object files are stored
-# output: /bin/app
+output: bin/scry
 
 # The file name suffix that needs to be monitored. By default, there is only a '.go' file.
 # watch_exts:
@@ -38,7 +37,7 @@ vendor_watch: false
 #   - path
 
 # main package path, can also be a single file, multiple files separated by commas
-build_pkg: ""
+build_pkg: "./cmd/"
 
 # build tags
 build_tags: ""
