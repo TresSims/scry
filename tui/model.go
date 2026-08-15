@@ -6,7 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/TresSims/scry/facts"
-	"github.com/TresSims/scry/tui/styles"
+	"github.com/TresSims/scry/tui/internal/styles"
 )
 
 // [Model] implements [tea.Model]
@@ -44,8 +44,7 @@ func New(opts ...Option) *Model {
 
 	model.t = 0
 
-	model.style = lipgloss.NewStyle().
-		Foreground(lipgloss.White)
+	model.style = styles.MainStyle
 
 	return model
 }
@@ -111,35 +110,23 @@ func (m Model) View() tea.View {
 }
 
 func (m Model) renderHeader() string {
-	tabStyle := m.style.
-		Border(styles.Tab).
-		Padding(0, 1, 0)
-
-	primaryTabStyle := tabStyle.Border(styles.ActiveTab).
-		Foreground(lipgloss.Blue)
-
-	tabGapStyle := tabStyle.
-		BorderTop(false).
-		BorderLeft(false).
-		BorderRight(false)
-
 	tabList := []string{}
 
 	for i, tab := range m.tabs {
 		if i == m.t {
-			tabList = append(tabList, primaryTabStyle.Render(tab.Name()))
+			tabList = append(tabList, styles.PrimaryTabStyle.Render(tab.Name()))
 
 			continue
 		}
 
-		tabList = append(tabList, tabStyle.Render(tab.Name()))
+		tabList = append(tabList, styles.TabStyle.Render(tab.Name()))
 	}
 
 	tabs := lipgloss.JoinHorizontal(lipgloss.Left, tabList...)
 	tabsWidth := lipgloss.Width(tabs)
 	tabsHeight := lipgloss.Height(tabs)
 
-	gap := tabGapStyle.Height(tabsHeight).
+	gap := styles.GapTabStyle.Height(tabsHeight).
 		Render(strings.Repeat(" ", max(0, m.w-tabsWidth)))
 
 	return lipgloss.JoinHorizontal(lipgloss.Left, tabs, gap)

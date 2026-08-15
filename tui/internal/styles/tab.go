@@ -3,7 +3,7 @@ package styles
 import "charm.land/lipgloss/v2"
 
 var (
-	ActiveTab = lipgloss.Border{
+	ActiveTabBorder = lipgloss.Border{
 		Top:         "─",
 		Bottom:      " ",
 		Left:        "│",
@@ -14,7 +14,7 @@ var (
 		BottomRight: "└",
 	}
 
-	Tab = lipgloss.Border{
+	TabBorder = lipgloss.Border{
 		Top:         "─",
 		Bottom:      "─",
 		Left:        "│",
@@ -24,4 +24,16 @@ var (
 		BottomLeft:  "┴",
 		BottomRight: "┴",
 	}
+
+	TabStyle = MainStyle.
+			Border(ActiveTabBorder).
+			Padding(0, 1, 0)
+
+	PrimaryTabStyle = TabStyle.Border(ActiveTabBorder).
+			Foreground(lipgloss.Blue)
+
+	GapTabStyle = TabStyle.
+			BorderTop(false).
+			BorderLeft(false).
+			BorderRight(false)
 )
