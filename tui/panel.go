@@ -6,7 +6,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/TresSims/scry/facts"
-	"github.com/TresSims/scry/scry"
 	"github.com/TresSims/scry/tui/styles"
 )
 
@@ -17,10 +16,6 @@ type Model struct {
 
 	// index of the current tab
 	t int
-
-	// client or server mode, effectively whether to fetch data from the
-	// local machine or a remote one
-	mode scry.Mode
 
 	// tabs has a list of tabs that can be rendered
 	tabs []Tab
@@ -47,14 +42,6 @@ func New(opts ...Option) *Model {
 		Foreground(lipgloss.White)
 
 	return model
-}
-
-func AsClient(m *Model) {
-	m.mode = scry.Client
-}
-
-func AsServer(m *Model) {
-	m.mode = scry.Server
 }
 
 func WithEngine(e *facts.Engine) Option {

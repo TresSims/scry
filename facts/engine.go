@@ -1,7 +1,7 @@
 package facts
 
 import (
-	"context"
+	"os"
 	"sync"
 	"time"
 )
@@ -15,13 +15,13 @@ type Engine struct {
 	mux sync.Mutex
 }
 
-func (e *Engine) Collect(ctx context.Context) {
+func (e *Engine) Collect(c chan os.Signal) {
 	e.runCollection()
 	ticker := time.NewTicker(5 * time.Second)
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-c:
 			return
 
 		case <-ticker.C:
