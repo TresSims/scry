@@ -10,7 +10,7 @@ import (
 // [MainTab] implements [Tab]
 type MainTab struct{}
 
-func (t *MainTab) Render(w, h int, f facts.Snapshot, style lipgloss.Style) string {
+func (t *MainTab) Render(w, h int, f facts.Cache, style lipgloss.Style) string {
 	render := style.Width(w).Height(h).Render(fmt.Sprintf("hostname: %s \n\n\nRandom: %d", f["hostname"], f["count"]))
 
 	return render

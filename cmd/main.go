@@ -32,16 +32,10 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start fact engine
-	e := &facts.Engine{
-		Data: map[string]facts.Fact{
-			"hostname": {
-				Facter: func() (any, error) { return os.Hostname() },
-			},
-			"count": {
-				Facter: func() (any, error) { return rand.Int(), nil },
-			},
-		},
-	}
+	e := facts.NewEngine(map[string]facts.Facter{
+		"hostname": func() (any, error) { return os.Hostname() },
+		"count":    func() (any, error) { return rand.Int(), nil },
+	})
 	go e.Collect(done)
 
 	// Start wish server
@@ -79,7 +73,7 @@ func initTui(e *facts.Engine) bubbletea.ProgramHandler {
 	return func(s ssh.Session) *tea.Program {
 		p := tea.NewProgram(
 			tui.New(
-				tui.WithFacts(e.Snapshot()),
+				tui.WithFacts(e.Cache),
 				tui.WithTab(&tui.MainTab{}),
 			),
 			bubbletea.MakeOptions(s)...,

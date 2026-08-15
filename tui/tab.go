@@ -10,7 +10,7 @@ type Tab interface {
 	// Render takes (w)idth and (h)eight, the most recent facts, and the default
 	// style. returns a string filling those dimensions, and optionally using
 	// that style
-	Render(w, h int, f facts.Snapshot, style lipgloss.Style) string
+	Render(w, h int, f facts.Cache, style lipgloss.Style) string
 
 	// Name returns the name of the tab
 	Name() string

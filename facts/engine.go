@@ -6,23 +6,39 @@ import (
 	"time"
 )
 
-// Snapshot is a point-in-time copy of every cached fact, keyed the same way as
-// [Engine.Data]. It is safe to read without holding a lock.
+// Cache is a point-in-time copy of every cached fact, keyed the same way as
+// [Engine.Facters]. It is safe to read without holding a lock.
 //
 // The copy is shallow: [Facter]s are expected to return fresh values and never
 // mutate a value they have already handed over.
-type Snapshot map[string]any
+type Cache map[string]any
 
 // Engine contains mirrored string maps, one for [Facter]s that collect system info
 // and one that caches the results
 type Engine struct {
-	// Data is a map of fact results for quick access
-	Data map[string]Fact
+	// Facters is a map of fact results for quick access
+	Facters map[string]Facter
 
+	// The most recent state collected by the [Facter]s
+	Cache Cache
+
+	// A mutex lock for reading and writing to the cache
 	mux sync.Mutex
 
+	// A mutex lock for working with subscription channels
 	subMux sync.Mutex
-	subs   map[chan Snapshot]struct{}
+
+	// A map of active subscription channels to broadcast new state to
+	subs map[chan Cache]struct{}
+}
+
+func NewEngine(facters map[string]Facter) *Engine {
+	e := &Engine{
+		Facters: facters,
+		Cache:   make(map[string]any),
+	}
+
+	return e
 }
 
 func (e *Engine) Collect(c chan os.Signal) {
@@ -40,14 +56,14 @@ func (e *Engine) Collect(c chan os.Signal) {
 	}
 }
 
-// Subscribe returns a channel that receives a [Snapshot] after every collection
+// Subscribe returns a channel that receives a [Cache] after every collection
 // pass, and a function that unsubscribes and closes it.
-func (e *Engine) Subscribe() (<-chan Snapshot, func()) {
-	ch := make(chan Snapshot, 1)
+func (e *Engine) Subscribe() (<-chan Cache, func()) {
+	ch := make(chan Cache, 1)
 
 	e.subMux.Lock()
 	if e.subs == nil {
-		e.subs = map[chan Snapshot]struct{}{}
+		e.subs = map[chan Cache]struct{}{}
 	}
 	e.subs[ch] = struct{}{}
 	e.subMux.Unlock()
@@ -65,20 +81,7 @@ func (e *Engine) Subscribe() (<-chan Snapshot, func()) {
 	}
 }
 
-// Snapshot copies the currently cached fact values.
-func (e *Engine) Snapshot() Snapshot {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-
-	s := make(Snapshot, len(e.Data))
-	for k, f := range e.Data {
-		s[k] = f.Cache
-	}
-
-	return s
-}
-
-func (e *Engine) broadcast(s Snapshot) {
+func (e *Engine) broadcast() {
 	e.subMux.Lock()
 	defer e.subMux.Unlock()
 
@@ -87,10 +90,10 @@ func (e *Engine) broadcast(s Snapshot) {
 		// wakes to the newest one. Only the collection goroutine sends, so
 		// after a successful drain the buffer slot is ours.
 		select {
-		case ch <- s:
+		case ch <- e.Cache:
 		default:
 			<-ch
-			ch <- s
+			ch <- e.Cache
 		}
 	}
 }
@@ -98,9 +101,9 @@ func (e *Engine) broadcast(s Snapshot) {
 func (e *Engine) runCollection() {
 	var wg sync.WaitGroup
 
-	for k, f := range e.Data {
+	for k, f := range e.Facters {
 		wg.Go(func() {
-			val, err := f.Facter()
+			val, err := f()
 			if err != nil {
 				return
 			}
@@ -108,12 +111,11 @@ func (e *Engine) runCollection() {
 			e.mux.Lock()
 			defer e.mux.Unlock()
 
-			f.Cache = val
-			e.Data[k] = f
+			e.Cache[k] = val
 		})
 	}
 
 	wg.Wait()
 
-	e.broadcast(e.Snapshot())
+	e.broadcast()
 }

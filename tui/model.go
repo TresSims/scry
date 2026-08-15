@@ -24,13 +24,13 @@ type Model struct {
 	style lipgloss.Style
 
 	// the most recent facts collected by the engine
-	facts facts.Snapshot
+	facts facts.Cache
 }
 
-// FactsMsg carries a new [facts.Snapshot] into the model. The fact engine runs
+// FactsMsg carries a new [facts.Cache] into the model. The fact engine runs
 // outside of bubbletea, so its results arrive through [tea.Program.Send].
 type FactsMsg struct {
-	Facts facts.Snapshot
+	Facts facts.Cache
 }
 
 type Option func(*Model)
@@ -50,9 +50,9 @@ func New(opts ...Option) *Model {
 	return model
 }
 
-// WithFacts seeds the model with a [facts.Snapshot] so the first frame has
+// WithFacts seeds the model with a [facts.Cache] so the first frame has
 // content to render before the engine's next collection pass.
-func WithFacts(f facts.Snapshot) Option {
+func WithFacts(f facts.Cache) Option {
 	return func(m *Model) {
 		m.facts = f
 	}
