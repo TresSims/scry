@@ -48,7 +48,7 @@ func main() {
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
 		wish.WithMiddleware(
-			bubbletea.Middleware(initTui(e)),
+			bubbletea.MiddlewareWithProgramHandler(initTui(e)),
 			activeterm.Middleware(),
 			logging.Middleware(),
 		),
@@ -75,12 +75,38 @@ func main() {
 	}
 }
 
-func initTui(e *facts.Engine) bubbletea.Handler {
-	return func(ssh.Session) (tea.Model, []tea.ProgramOption) {
-		return tui.New(
-			tui.WithEngine(e),
-			(&tui.MainTab{}).Load,
-			(&tui.MainTab{}).Load,
-		), []tea.ProgramOption{}
+func initTui(e *facts.Engine) bubbletea.ProgramHandler {
+	return func(s ssh.Session) *tea.Program {
+		p := tea.NewProgram(
+			tui.New(
+				tui.WithFacts(e.Snapshot()),
+				tui.WithTab(&tui.MainTab{}),
+			),
+			bubbletea.MakeOptions(s)...,
+		)
+
+		// Pump the engine's snapshots into this session's program. Send blocks
+		// until the program picks the message up, so it runs on its own
+		// goroutine rather than on the collection loop.
+		updates, unsubscribe := e.Subscribe()
+		go func() {
+			defer unsubscribe()
+
+			for {
+				select {
+				case <-s.Context().Done():
+					return
+
+				case snapshot, ok := <-updates:
+					if !ok {
+						return
+					}
+
+					p.Send(tui.FactsMsg{Facts: snapshot})
+				}
+			}
+		}()
+
+		return p
 	}
 }

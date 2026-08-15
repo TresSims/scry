@@ -23,8 +23,14 @@ type Model struct {
 	// the default stlye
 	style lipgloss.Style
 
-	// the fact engine
-	Engine *facts.Engine
+	// the most recent facts collected by the engine
+	facts facts.Snapshot
+}
+
+// FactsMsg carries a new [facts.Snapshot] into the model. The fact engine runs
+// outside of bubbletea, so its results arrive through [tea.Program.Send].
+type FactsMsg struct {
+	Facts facts.Snapshot
 }
 
 type Option func(*Model)
@@ -44,9 +50,18 @@ func New(opts ...Option) *Model {
 	return model
 }
 
-func WithEngine(e *facts.Engine) Option {
+// WithFacts seeds the model with a [facts.Snapshot] so the first frame has
+// content to render before the engine's next collection pass.
+func WithFacts(f facts.Snapshot) Option {
 	return func(m *Model) {
-		m.Engine = e
+		m.facts = f
+	}
+}
+
+// WithTab adds a [Tab] to the [Model]
+func WithTab(t Tab) Option {
+	return func(m *Model) {
+		m.tabs = append(m.tabs, t)
 	}
 }
 
@@ -74,6 +89,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.w = msg.Width
 		m.h = msg.Height
+
+	case FactsMsg:
+		m.facts = msg.Facts
 	}
 
 	return m, nil
@@ -83,7 +101,7 @@ func (m Model) View() tea.View {
 	header := m.renderHeader()
 	headerHeight := lipgloss.Height(header)
 
-	tab := m.tabs[m.t].Render(m.w, m.h-headerHeight, m.style)
+	tab := m.tabs[m.t].Render(m.w, m.h-headerHeight, m.facts, m.style)
 
 	v := tea.NewView(lipgloss.JoinVertical(lipgloss.Top, header, tab))
 

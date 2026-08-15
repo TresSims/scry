@@ -8,17 +8,10 @@ import (
 )
 
 // [MainTab] implements [Tab]
-type MainTab struct {
-	Engine *facts.Engine
-}
+type MainTab struct{}
 
-func (t *MainTab) Load(m *Model) {
-	t.Engine = m.Engine
-	m.tabs = append(m.tabs, t)
-}
-
-func (t *MainTab) Render(w, h int, style lipgloss.Style) string {
-	render := style.Width(w).Height(h).Render(fmt.Sprintf("hostname: %s \n\n\nRandom: %d", t.Engine.Data["hostname"].Cache, t.Engine.Data["count"].Cache))
+func (t *MainTab) Render(w, h int, f facts.Snapshot, style lipgloss.Style) string {
+	render := style.Width(w).Height(h).Render(fmt.Sprintf("hostname: %s \n\n\nRandom: %d", f["hostname"], f["count"]))
 
 	return render
 }
