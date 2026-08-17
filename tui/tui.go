@@ -89,8 +89,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.w = msg.Width
 		m.h = msg.Height
 
+		headerHeight := lipgloss.Height(m.renderHeader())
+
+		for _, t := range m.tabs {
+			t.SetSize(m.w, m.h-headerHeight)
+		}
+
 	case FactsMsg:
 		m.facts = msg.Facts
+
+		m.tabs[m.t].Update(msg)
 	}
 
 	return m, nil
@@ -98,11 +106,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m Model) View() tea.View {
 	header := m.renderHeader()
-	headerHeight := lipgloss.Height(header)
 
-	tab := m.tabs[m.t].Render(m.w, m.h-headerHeight, m.facts, m.style)
+	tabView := m.tabs[m.t].View()
 
-	v := tea.NewView(lipgloss.JoinVertical(lipgloss.Top, header, tab))
+	v := tea.NewView(lipgloss.JoinVertical(lipgloss.Top, header, tabView.Content))
 
 	v.AltScreen = true
 

@@ -1,17 +1,22 @@
 package tui
 
-import (
-	"charm.land/lipgloss/v2"
-	"github.com/TresSims/scry/facts"
-)
+import tea "charm.land/bubbletea/v2"
 
 // Tab is an interface for rendering a tab page for the scry tui
 type Tab interface {
-	// Render takes (w)idth and (h)eight, the most recent facts, and the default
-	// style. returns a string filling those dimensions, and optionally using
-	// that style
-	Render(w, h int, f facts.Cache, style lipgloss.Style) string
+	// Init implements [tea.Model]
+	Init() tea.Cmd
+
+	// Update implements [tea.Model]
+	Update(tea.Msg) (tea.Model, tea.Cmd)
+
+	// View implements [tea.View]
+	View() tea.View
 
 	// Name returns the name of the tab
 	Name() string
+
+	// SetSize passes thet usable bubble tea size to it. The [Tab] is expected to
+	// respect this
+	SetSize(w, h int)
 }

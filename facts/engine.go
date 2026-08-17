@@ -70,6 +70,7 @@ func (e *Engine) Subscribe() (<-chan Cache, func()) {
 
 	var once sync.Once
 
+	e.broadcast()
 	return ch, func() {
 		once.Do(func() {
 			e.subMux.Lock()
