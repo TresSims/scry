@@ -69,6 +69,11 @@ func (_ Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -97,11 +102,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case FactsMsg:
 		m.facts = msg.Facts
-
-		m.tabs[m.t].Update(msg)
 	}
 
-	return m, nil
+	tabModel, cmd := m.tabs[m.t].Update(msg)
+	cmds = append(cmds, cmd)
+
+	// Error discarded because [Tab] explicitly implements [tea.Model]
+	m.tabs[m.t], _ = tabModel.(Tab)
+
+	return m, tea.Batch(cmds...)
 }
 
 func (m Model) View() tea.View {
