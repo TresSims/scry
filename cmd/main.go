@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"math/rand"
 	"net"
 	"os"
 	"os/signal"
@@ -32,10 +31,7 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start fact engine
-	e := facts.NewEngine(map[string]facts.Facter{
-		"hostname": func() (any, error) { return os.Hostname() },
-		"count":    func() (any, error) { return rand.Int(), nil },
-	})
+	e := facts.NewEngine(facts.DefaultFacts)
 	go e.Collect(done)
 
 	// Start wish server
