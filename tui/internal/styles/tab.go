@@ -26,7 +26,7 @@ var (
 	}
 
 	TabStyle = MainStyle.
-			Border(ActiveTabBorder).
+			Border(TabBorder).
 			Padding(0, 1, 0)
 
 	PrimaryTabStyle = TabStyle.Border(ActiveTabBorder).
