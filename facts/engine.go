@@ -4,6 +4,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"charm.land/log/v2"
 )
 
 // Cache is a point-in-time copy of every cached fact, keyed the same way as
@@ -106,6 +108,8 @@ func (e *Engine) runCollection() {
 		wg.Go(func() {
 			val, err := f()
 			if err != nil {
+				log.Errorf("Unable to collect fact %s: %s", k, err)
+
 				return
 			}
 

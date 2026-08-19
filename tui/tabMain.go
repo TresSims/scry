@@ -37,7 +37,28 @@ func (t *MainTab) View() tea.View {
 
 	renderedTable := table.Render()
 
-	v.SetContent(lipgloss.JoinVertical(lipgloss.Top, renderedTable))
+	var (
+		renderedList string
+		logList      []facts.SyslogLine
+		ok           bool
+	)
+
+	logListUnknown := t.f["journal"]
+	if logList, ok = logListUnknown.([]facts.SyslogLine); !ok {
+		renderedList = "Error reading logList"
+	}
+
+	if renderedList != "Error reading logList" {
+		for _, line := range logList {
+			renderedList += line.String() + "\n"
+		}
+	}
+
+	v.SetContent(lipgloss.JoinVertical(
+		lipgloss.Top,
+		renderedTable,
+		renderedList,
+	))
 
 	return v
 }
