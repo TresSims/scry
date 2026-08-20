@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 
+	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"charm.land/lipgloss/v2/table"
@@ -14,18 +15,30 @@ type MainTab struct {
 	w, h int
 
 	f facts.Cache
+
+	viewport viewport.Model
+	ready    bool
 }
 
-func (_ *MainTab) Init() tea.Cmd {
+func (m *MainTab) Init() tea.Cmd {
 	return nil
 }
 
 func (t *MainTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case FactsMsg:
 		t.f = msg.Facts
 	}
-	return t, nil
+
+	t.viewport, cmd = t.viewport.Update(msg)
+	cmds = append(cmds, cmd)
+
+	return t, tea.Batch(cmds...)
 }
 
 func (t *MainTab) View() tea.View {
@@ -54,10 +67,12 @@ func (t *MainTab) View() tea.View {
 		}
 	}
 
+	t.renderViewport(t.w, t.h-lipgloss.Height(renderedTable), renderedList)
+
 	v.SetContent(lipgloss.JoinVertical(
 		lipgloss.Top,
 		renderedTable,
-		renderedList,
+		t.viewport.View(),
 	))
 
 	return v
@@ -70,4 +85,29 @@ func (t *MainTab) Name() string {
 func (t *MainTab) SetSize(w, h int) {
 	t.w = w
 	t.h = h
+}
+
+func (t *MainTab) renderViewport(w, h int, content string) {
+	if !t.ready {
+		t.viewport = viewport.New(viewport.WithHeight(h), viewport.WithWidth(w))
+		// tab height - viewport height = Y Offset
+		t.viewport.YPosition = t.h - h
+		t.viewport.LeftGutterFunc = func(info viewport.GutterContext) string {
+			switch {
+
+			case info.Soft:
+				return "   | "
+			case info.Index >= info.TotalLines:
+				return "  ~| "
+			default:
+				return fmt.Sprintf("%4d | ", info.Index+1)
+			}
+		}
+		t.viewport.SetContent(content)
+		t.ready = true
+	} else {
+		t.viewport.SetWidth(w)
+		t.viewport.SetHeight(h)
+		t.viewport.SetContent(content)
+	}
 }

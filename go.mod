@@ -3,6 +3,8 @@ module github.com/TresSims/scry
 go 1.26.5
 
 require (
+	charm.land/bubbles/v2 v2.1.1
+	charm.land/bubbletea/v2 v2.0.8
 	charm.land/lipgloss/v2 v2.0.5
 	charm.land/log/v2 v2.0.0
 	charm.land/ssh v0.4.3
@@ -10,7 +12,6 @@ require (
 )
 
 require (
-	charm.land/bubbletea/v2 v2.0.8 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/keygen v0.5.4 // indirect
@@ -26,7 +27,7 @@ require (
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
-	github.com/mattn/go-runewidth v0.0.23 // indirect
+	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/pires/go-proxyproto v0.12.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
