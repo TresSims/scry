@@ -121,9 +121,9 @@ func (f Facility) String() string {
 
 type SyslogLine struct {
 	Message    string   `json:"MESSAGE"`
-	Priority   Priority `json:"PRIORITY"`
+	Priority   Priority `json:"PRIORITY,string"`
 	Identifier string   `json:"SYSLOG_IDENTIFIER"`
-	Facility   Facility `json:"SYSLOG_FACILITY"`
+	Facility   Facility `json:"SYSLOG_FACILITY,string"`
 }
 
 func (s SyslogLine) String() string {
