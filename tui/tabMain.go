@@ -104,10 +104,18 @@ func (t *MainTab) renderViewport(w, h int, content string) {
 			}
 		}
 		t.viewport.SetContent(content)
+		t.viewport.GotoBottom()
 		t.ready = true
 	} else {
+		// Follow the live stream unless the user has scrolled up
+		atBottom := t.viewport.AtBottom()
+
 		t.viewport.SetWidth(w)
 		t.viewport.SetHeight(h)
 		t.viewport.SetContent(content)
+
+		if atBottom {
+			t.viewport.GotoBottom()
+		}
 	}
 }
