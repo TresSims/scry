@@ -2,6 +2,7 @@ package bundle
 
 import (
 	"os"
+	"path/filepath"
 	"plugin"
 
 	"charm.land/log/v2"
@@ -45,7 +46,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 	for _, entry := range entries {
 		// If it's a file, e.g. a plugin
 		if !entry.IsDir() {
-			plug, err := plugin.Open(entry.Name())
+			plug, err := plugin.Open(filepath.Join(pluginDir, entry.Name()))
 			if err != nil {
 				continue
 			}
