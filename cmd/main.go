@@ -16,6 +16,7 @@ import (
 	"charm.land/wish/v2/activeterm"
 	"charm.land/wish/v2/bubbletea"
 	"charm.land/wish/v2/logging"
+	"github.com/TresSims/scry/bundle"
 	"github.com/TresSims/scry/facts"
 	"github.com/TresSims/scry/tui"
 )
@@ -26,6 +27,11 @@ const (
 )
 
 func main() {
+	pluginBundle, err := bundle.LoadPlugins("./plugins")
+	if err != nil {
+		log.Warn("Unable to load plugins, skipping plugins")
+	}
+
 	// establish exit conditions
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
@@ -33,14 +39,21 @@ func main() {
 	ctx, stopFacter := context.WithCancel(context.Background())
 
 	// Start fact engine
-	e := facts.NewEngine(facts.DefaultFacts)
+	f := facts.DefaultFacts
+	for k, v := range pluginBundle.Facters {
+		if _, ok := f[k]; ok {
+			log.Warn("Overwriting facter for " + k)
+		}
+
+		f[k] = v
+	}
+	e := facts.NewEngine(f)
 	go e.Collect(ctx)
 
-	// Start wish server
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
 		wish.WithMiddleware(
-			bubbletea.MiddlewareWithProgramHandler(initTui(e)),
+			bubbletea.MiddlewareWithProgramHandler(initTui(e, pluginBundle.Options)),
 			activeterm.Middleware(),
 			logging.Middleware(),
 		),
@@ -70,13 +83,14 @@ func main() {
 	stopFacter()
 }
 
-func initTui(e *facts.Engine) bubbletea.ProgramHandler {
+func initTui(e *facts.Engine, extraOptions []tui.Option) bubbletea.ProgramHandler {
 	return func(s ssh.Session) *tea.Program {
+		opts := append([]tui.Option{
+			tui.WithFacts(e.Cache),
+			tui.WithTab(&tui.MainTab{}),
+		}, extraOptions...)
 		p := tea.NewProgram(
-			tui.New(
-				tui.WithFacts(e.Cache),
-				tui.WithTab(&tui.MainTab{}),
-			),
+			tui.New(opts...),
 			bubbletea.MakeOptions(s)...,
 		)
 

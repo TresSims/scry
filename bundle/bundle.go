@@ -1,0 +1,76 @@
+package bundle
+
+import (
+	"os"
+	"plugin"
+
+	"charm.land/log/v2"
+	"github.com/TresSims/scry/facts"
+	"github.com/TresSims/scry/tui"
+)
+
+const Key = "Bundle"
+
+type Bundle interface {
+	// Facters returns a string map of [facts.Facter]s that will be merged into the program
+	Facters() map[string]facts.Facter
+
+	// TuiOptions returns a list of [tui.Option]s that will be added to the bubbletea program
+	//
+	// These are usually WithTab(tab) options
+	TuiOptions() []tui.Option
+}
+
+// PluginSet is the set of extracted and merged interfaces that LoadPlugins returns
+type PluginSet struct {
+	Facters map[string]facts.Facter
+
+	Options []tui.Option
+}
+
+// LoadPlugins returns an array of all [Bundle]s in a given directory
+func LoadPlugins(pluginDir string) (*PluginSet, error) {
+	entries, err := os.ReadDir(pluginDir)
+	if err != nil {
+		return nil, err
+	}
+
+	set := &PluginSet{
+		Facters: map[string]facts.Facter{},
+		Options: []tui.Option{},
+	}
+
+	for _, entry := range entries {
+		// If it's a file, e.g. a plugin
+		if !entry.IsDir() {
+			plug, err := plugin.Open(entry.Name())
+			if err != nil {
+				continue
+			}
+
+			symBundle, err := plug.Lookup("Bundle")
+			if err != nil {
+				continue
+			}
+
+			bundle, ok := symBundle.(Bundle)
+			if !ok {
+				continue
+			}
+
+			for k, v := range bundle.Facters() {
+				if _, ok := set.Facters[k]; ok {
+					log.Warn("Overwriting facter for " + k)
+				}
+
+				set.Facters[k] = v
+			}
+
+			for _, opt := range bundle.TuiOptions() {
+				set.Options = append(set.Options, opt)
+			}
+		}
+	}
+
+	return set, nil
+}
