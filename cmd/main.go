@@ -30,9 +30,11 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	ctx, stopFacter := context.WithCancel(context.Background())
+
 	// Start fact engine
 	e := facts.NewEngine(facts.DefaultFacts)
-	go e.Collect(done)
+	go e.Collect(ctx)
 
 	// Start wish server
 	s, err := wish.NewServer(
@@ -58,11 +60,14 @@ func main() {
 
 	<-done
 	log.Info("Stopping SSH server")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	shutdownContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer func() { cancel() }()
-	if err := s.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
+	if err := s.Shutdown(shutdownContext); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 		log.Error("Could not stop server", "error", err)
 	}
+
+	log.Info("Shutting down fact engine")
+	stopFacter()
 }
 
 func initTui(e *facts.Engine) bubbletea.ProgramHandler {

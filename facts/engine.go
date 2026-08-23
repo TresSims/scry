@@ -1,11 +1,8 @@
 package facts
 
 import (
-	"os"
+	"context"
 	"sync"
-	"time"
-
-	"charm.land/log/v2"
 )
 
 // Cache is a point-in-time copy of every cached fact, keyed the same way as
@@ -43,19 +40,22 @@ func NewEngine(facters map[string]Facter) *Engine {
 	return e
 }
 
-func (e *Engine) Collect(c chan os.Signal) {
-	e.runCollection()
-	ticker := time.NewTicker(5 * time.Second)
+func (e *Engine) Collect(ctx context.Context) {
+	wg := sync.WaitGroup{}
 
-	for {
-		select {
-		case <-c:
-			return
+	for key, facter := range e.Facters {
+		wg.Go(func() {
+			facter(ctx, func(val any) {
+				e.mux.Lock()
+				defer e.mux.Unlock()
 
-		case <-ticker.C:
-			e.runCollection()
-		}
+				e.Cache[key] = val
+				e.broadcast()
+			})
+		})
 	}
+
+	wg.Wait()
 }
 
 // Subscribe returns a channel that receives a [Cache] after every collection
@@ -99,28 +99,4 @@ func (e *Engine) broadcast() {
 			ch <- e.Cache
 		}
 	}
-}
-
-func (e *Engine) runCollection() {
-	var wg sync.WaitGroup
-
-	for k, f := range e.Facters {
-		wg.Go(func() {
-			val, err := f()
-			if err != nil {
-				log.Errorf("Unable to collect fact %s: %s", k, err)
-
-				return
-			}
-
-			e.mux.Lock()
-			defer e.mux.Unlock()
-
-			e.Cache[k] = val
-		})
-	}
-
-	wg.Wait()
-
-	e.broadcast()
 }

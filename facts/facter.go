@@ -2,52 +2,87 @@ package facts
 
 import (
 	"bufio"
-	"bytes"
+	"context"
 	"encoding/json"
 	"net"
 	"os"
 	"os/exec"
+	"time"
 )
 
 // Facter interface is an interface for gathering facts about a system
-type Facter func() (any, error)
+//
+// the mutex lock should be used before writing to the shared store.
+// the publish func should be called after the the any value is updated
+// to pass it to subscribers
+type Facter func(ctx context.Context, publish func(val any)) error
 
-func HostnameFact() (any, error) {
-	return os.Hostname()
-}
-
-func ConnectivityFact() (any, error) {
-	conn, err := net.Dial("tcp", "google.com:80")
+// HostnameFact is an example of a static fact that never changes
+func HostnameFact(ctx context.Context, publish func(val any)) error {
+	hostname, err := os.Hostname()
 	if err != nil {
-		return false, nil
+		return err
 	}
-	defer conn.Close()
 
-	return true, nil
+	publish(hostname)
+
+	return nil
 }
 
-func JournalctlFact() (any, error) {
-	cmd := exec.Command("/usr/bin/journalctl", "-e", "--no-pager", "--output=json")
+// ConnectivityFact is an example of a fact that polls intermittently.
+func ConnectivityFact(ctx context.Context, publish func(val any)) error {
+	timer := time.NewTicker(time.Second * 5)
+
+	for {
+		select {
+		case <-timer.C:
+			conn, err := net.Dial("tcp", "google.com:80")
+			if err != nil {
+				publish(false)
+			}
+			defer conn.Close()
+
+			publish(true)
+		case <-ctx.Done():
+			return nil
+		}
+	}
+}
+
+// JournalctlFact is an example of a fact that is constantly streaming data to the ui
+func JournalctlFact(ctx context.Context, publish func(val any)) error {
+	cmd := exec.CommandContext(ctx, "/usr/bin/journalctl", "-ef", "--output=json")
 
 	lines := []SyslogLine{}
 
-	journalOutput, err := cmd.Output()
+	journalOutput, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	scanner := bufio.NewScanner(bytes.NewReader(journalOutput))
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(journalOutput)
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		logLine := &SyslogLine{}
 
-		json.Unmarshal(line, logLine)
-
+		if err = json.Unmarshal(line, logLine); err != nil {
+			continue
+		}
 		lines = append(lines, *logLine)
+
+		publish(lines)
 	}
 
-	return lines, nil
+	if err := cmd.Wait(); err != nil && ctx.Err() != nil {
+		return err
+	}
+
+	return scanner.Err()
 }
 
 var DefaultFacts map[string]Facter = map[string]Facter{
