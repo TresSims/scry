@@ -44,6 +44,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 	}
 
 	for _, entry := range entries {
+		log.Debug("Loading plugin " + entry.Name())
 		// If it's a file, e.g. a plugin
 		if !entry.IsDir() {
 			plug, err := plugin.Open(filepath.Join(pluginDir, entry.Name()))
@@ -64,6 +65,8 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 			for k, v := range bundle.Facters() {
 				if _, ok := set.Facters[k]; ok {
 					log.Warn("Overwriting facter for " + k)
+				} else {
+					log.Info("Registering facter for " + k)
 				}
 
 				set.Facters[k] = v
@@ -71,6 +74,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 
 			for _, opt := range bundle.TuiOptions() {
 				set.Options = append(set.Options, opt)
+				log.Info("Adding new tab")
 			}
 		}
 	}

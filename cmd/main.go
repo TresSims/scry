@@ -27,6 +27,7 @@ const (
 )
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	pluginBundle, err := bundle.LoadPlugins("./plugins")
 	if err != nil {
 		log.Warn("Unable to load plugins, skipping plugins")
