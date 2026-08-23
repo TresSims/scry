@@ -30,14 +30,16 @@ type PluginSet struct {
 
 // LoadPlugins returns an array of all [Bundle]s in a given directory
 func LoadPlugins(pluginDir string) (*PluginSet, error) {
-	entries, err := os.ReadDir(pluginDir)
-	if err != nil {
-		return nil, err
-	}
-
+	// Initialize and always return an empty plugin set
+	// to avoid segfaults at runtime
 	set := &PluginSet{
 		Facters: map[string]facts.Facter{},
 		Options: []tui.Option{},
+	}
+
+	entries, err := os.ReadDir(pluginDir)
+	if err != nil {
+		return set, err
 	}
 
 	for _, entry := range entries {
