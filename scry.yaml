@@ -1,0 +1,12 @@
+---
+host: 127.0.0.1
+port: "2323"
+pluginDir: ./plugins
+# Verbosity follows charm.land conventions
+# https://github.com/charmbracelet/log/blob/main/level.go#L13
+# Debug = -4
+# Info = 0
+# Warn = 4
+# Error = 8
+# Fatal = 12
+verbosity: 0

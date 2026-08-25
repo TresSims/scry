@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"context"
@@ -17,18 +17,29 @@ import (
 	"charm.land/wish/v2/bubbletea"
 	"charm.land/wish/v2/logging"
 	"github.com/TresSims/scry/bundle"
+	"github.com/TresSims/scry/config"
 	"github.com/TresSims/scry/facts"
 	"github.com/TresSims/scry/tui"
+	"github.com/spf13/cobra"
 )
 
-const (
-	host = "localhost"
-	port = "2323"
-)
+var runCmd = &cobra.Command{
+	Use:   "run",
+	Short: "start the scry server",
+	Run:   scry,
+}
 
-func main() {
-	log.SetLevel(log.DebugLevel)
-	pluginBundle, err := bundle.LoadPlugins("./plugins")
+func init() {
+	rootCmd.AddCommand(runCmd)
+}
+
+func scry(_ *cobra.Command, _ []string) {
+	cfg, err := config.Get()
+	if err != nil {
+		log.Error("Unable to start scry server", "error", err)
+	}
+
+	pluginBundle, err := bundle.LoadPlugins(cfg.PluginDir)
 	if err != nil {
 		log.Warn("Unable to load plugins, skipping plugins")
 	}
@@ -52,7 +63,7 @@ func main() {
 	go e.Collect(ctx)
 
 	s, err := wish.NewServer(
-		wish.WithAddress(net.JoinHostPort(host, port)),
+		wish.WithAddress(net.JoinHostPort(cfg.Host, cfg.Port)),
 		wish.WithMiddleware(
 			bubbletea.MiddlewareWithProgramHandler(initTui(e, pluginBundle.Options)),
 			activeterm.Middleware(),
@@ -70,7 +81,7 @@ func main() {
 		}
 	}()
 
-	log.Info("Server is up!", "host", host, "port", port)
+	log.Info("Server is up!", "host", cfg.Host, "port", cfg.Port)
 
 	<-done
 	log.Info("Stopping SSH server")
