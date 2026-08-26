@@ -65,7 +65,7 @@ func scry(_ *cobra.Command, _ []string) {
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(cfg.Host, cfg.Port)),
 		wish.WithMiddleware(
-			bubbletea.MiddlewareWithProgramHandler(initTui(e, pluginBundle.Options)),
+			bubbletea.MiddlewareWithProgramHandler(initTui(e, pluginBundle.Tabs)),
 			activeterm.Middleware(),
 			logging.Middleware(),
 		),
@@ -95,7 +95,13 @@ func scry(_ *cobra.Command, _ []string) {
 	stopFacter()
 }
 
-func initTui(e *facts.Engine, extraOptions []tui.Option) bubbletea.ProgramHandler {
+func initTui(e *facts.Engine, extraTabs []tui.Tab) bubbletea.ProgramHandler {
+	extraOptions := []tui.Option{}
+
+	for _, tab := range extraTabs {
+		extraOptions = append(extraOptions, tui.WithTab(tab))
+	}
+
 	return func(s ssh.Session) *tea.Program {
 		opts := append([]tui.Option{
 			tui.WithFacts(e.Cache),

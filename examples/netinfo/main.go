@@ -16,10 +16,10 @@ func (_ NetInfoBundle) Facters() map[string]facts.Facter {
 	}
 }
 
-// TuiOptions resturns all of the Tabs wrapped by WithTab
-func (_ NetInfoBundle) TuiOptions() []tui.Option {
-	return []tui.Option{
-		tui.WithTab(NewNetInfoTab()),
+// Tabs returns all of the Tabs to add to the tui
+func (_ NetInfoBundle) Tabs() []tui.Tab {
+	return []tui.Tab{
+		NewNetInfoTab(),
 	}
 }
 

@@ -16,17 +16,17 @@ type Bundle interface {
 	// Facters returns a string map of [facts.Facter]s that will be merged into the program
 	Facters() map[string]facts.Facter
 
-	// TuiOptions returns a list of [tui.Option]s that will be added to the bubbletea program
+	// Tabs returns a list of [tui.Tab]s that will be added to the bubbletea program
 	//
-	// These are usually WithTab(tab) options
-	TuiOptions() []tui.Option
+	// These are add with a WithTab(tab) option
+	Tabs() []tui.Tab
 }
 
 // PluginSet is the set of extracted and merged interfaces that LoadPlugins returns
 type PluginSet struct {
 	Facters map[string]facts.Facter
 
-	Options []tui.Option
+	Tabs []tui.Tab
 }
 
 // LoadPlugins returns an array of all [Bundle]s in a given directory
@@ -35,7 +35,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 	// to avoid segfaults at runtime
 	set := &PluginSet{
 		Facters: map[string]facts.Facter{},
-		Options: []tui.Option{},
+		Tabs:    []tui.Tab{},
 	}
 
 	entries, err := os.ReadDir(pluginDir)
@@ -72,8 +72,8 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 				set.Facters[k] = v
 			}
 
-			for _, opt := range bundle.TuiOptions() {
-				set.Options = append(set.Options, opt)
+			for _, opt := range bundle.Tabs() {
+				set.Tabs = append(set.Tabs, opt)
 				log.Info("Adding new tab")
 			}
 		}
