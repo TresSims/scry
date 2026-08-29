@@ -6,15 +6,15 @@ import (
 	"plugin"
 
 	"charm.land/log/v2"
-	"github.com/TresSims/scry/facts"
+	"github.com/TresSims/scry/facter"
 	"github.com/TresSims/scry/tui"
 )
 
 const Key = "Bundle"
 
 type Bundle interface {
-	// Facters returns a string map of [facts.Facter]s that will be merged into the program
-	Facters() map[string]facts.Facter
+	// Facters returns a string map of [facter.Facter]s that will be merged into the program
+	Facters() map[string]facter.Facter
 
 	// Tabs returns a list of [tui.Tab]s that will be added to the bubbletea program
 	//
@@ -24,7 +24,7 @@ type Bundle interface {
 
 // PluginSet is the set of extracted and merged interfaces that LoadPlugins returns
 type PluginSet struct {
-	Facters map[string]facts.Facter
+	Facters map[string]facter.Facter
 
 	Tabs []tui.Tab
 }
@@ -34,7 +34,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 	// Initialize and always return an empty plugin set
 	// to avoid segfaults at runtime
 	set := &PluginSet{
-		Facters: map[string]facts.Facter{},
+		Facters: map[string]facter.Facter{},
 		Tabs:    []tui.Tab{},
 	}
 

@@ -18,7 +18,7 @@ import (
 	"charm.land/wish/v2/logging"
 	"github.com/TresSims/scry/bundle"
 	"github.com/TresSims/scry/config"
-	"github.com/TresSims/scry/facts"
+	"github.com/TresSims/scry/facter"
 	"github.com/TresSims/scry/tui"
 	"github.com/spf13/cobra"
 )
@@ -51,7 +51,7 @@ func scry(_ *cobra.Command, _ []string) {
 	ctx, stopFacter := context.WithCancel(context.Background())
 
 	// Start fact engine
-	f := facts.DefaultFacts
+	f := facter.DefaultFacts
 	for k, v := range pluginBundle.Facters {
 		if _, ok := f[k]; ok {
 			log.Warn("Overwriting facter for " + k)
@@ -59,7 +59,7 @@ func scry(_ *cobra.Command, _ []string) {
 
 		f[k] = v
 	}
-	e := facts.NewEngine(f)
+	e := facter.NewEngine(f)
 	go e.Collect(ctx)
 
 	s, err := wish.NewServer(
@@ -95,7 +95,7 @@ func scry(_ *cobra.Command, _ []string) {
 	stopFacter()
 }
 
-func initTui(e *facts.Engine, extraTabs []tui.Tab) bubbletea.ProgramHandler {
+func initTui(e *facter.Engine, extraTabs []tui.Tab) bubbletea.ProgramHandler {
 	extraOptions := []tui.Option{}
 
 	for _, tab := range extraTabs {

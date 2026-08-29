@@ -8,14 +8,15 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"charm.land/lipgloss/v2/table"
-	"github.com/TresSims/scry/facts"
+	"github.com/TresSims/scry/facter"
+	"github.com/TresSims/scry/facter/facts"
 )
 
 // [MainTab] implements [Tab]
 type MainTab struct {
 	w, h int
 
-	f facts.Cache
+	f facter.Cache
 
 	viewport viewport.Model
 	ready    bool

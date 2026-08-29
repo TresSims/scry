@@ -5,7 +5,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/TresSims/scry/facts"
+	"github.com/TresSims/scry/facter"
 	"github.com/TresSims/scry/tui/internal/styles"
 )
 
@@ -24,13 +24,13 @@ type Model struct {
 	style lipgloss.Style
 
 	// the most recent facts collected by the engine
-	facts facts.Cache
+	facts facter.Cache
 }
 
 // FactsMsg carries a new [facts.Cache] into the model. The fact engine runs
 // outside of bubbletea, so its results arrive through [tea.Program.Send].
 type FactsMsg struct {
-	Facts facts.Cache
+	Facts facter.Cache
 }
 
 type Option func(*Model)
@@ -51,7 +51,7 @@ func New(opts ...Option) *Model {
 
 // WithFacts seeds the model with a [facts.Cache] so the first frame has
 // content to render before the engine's next collection pass.
-func WithFacts(f facts.Cache) Option {
+func WithFacts(f facter.Cache) Option {
 	return func(m *Model) {
 		m.facts = f
 	}

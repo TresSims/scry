@@ -1,4 +1,4 @@
-package facts
+package facter
 
 import (
 	"context"

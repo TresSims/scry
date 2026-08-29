@@ -1,6 +1,12 @@
 package facts
 
-import "fmt"
+import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"fmt"
+	"os/exec"
+)
 
 type Priority int
 
@@ -128,4 +134,40 @@ type SyslogLine struct {
 
 func (s SyslogLine) String() string {
 	return fmt.Sprintf("[%s] %s (%s): %s", s.Priority, s.Identifier, s.Facility, s.Message)
+}
+
+// JournalctlFact is an example of a fact that is constantly streaming data to the ui
+func JournalctlFact(ctx context.Context, publish func(val any)) error {
+	cmd := exec.CommandContext(ctx, "/usr/bin/journalctl", "-ef", "--output=json")
+
+	lines := []SyslogLine{}
+
+	journalOutput, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(journalOutput)
+
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		logLine := &SyslogLine{}
+
+		if err = json.Unmarshal(line, logLine); err != nil {
+			continue
+		}
+		lines = append(lines, *logLine)
+
+		publish(lines)
+	}
+
+	if err := cmd.Wait(); err != nil && ctx.Err() != nil {
+		return err
+	}
+
+	return scanner.Err()
 }
