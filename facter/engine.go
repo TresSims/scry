@@ -72,14 +72,21 @@ func (e *Engine) Subscribe() (<-chan Cache, func()) {
 
 	var once sync.Once
 
+	e.mux.Lock()
+	defer e.mux.Unlock()
+	e.Cache["subscriptions"] = len(e.subs)
+
 	e.broadcast()
 	return ch, func() {
 		once.Do(func() {
 			e.subMux.Lock()
 			defer e.subMux.Unlock()
-
 			delete(e.subs, ch)
 			close(ch)
+
+			e.mux.Lock()
+			defer e.mux.Unlock()
+			e.Cache["subscriptions"] = len(e.subs)
 		})
 	}
 }
