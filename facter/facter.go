@@ -20,6 +20,7 @@ var DefaultFacts map[string]Facter = map[string]Facter{
 	"ip":           facts.DefaultIP,
 	"netInfo":      facts.Net,
 	"cpuInfo":      facts.CPU,
+	"memInfo":      facts.Mem,
 	"system":       facts.System,
 	"uptime":       facts.Uptime,
 }
