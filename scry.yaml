@@ -1,6 +1,6 @@
 ---
 host: 127.0.0.1
-port: "22"
+port: "2222"
 pluginDir: ./plugins
 # Verbosity follows charm.land conventions
 # https://github.com/charmbracelet/log/blob/main/level.go#L13

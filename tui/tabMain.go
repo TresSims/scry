@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"strings"
 
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
@@ -69,9 +70,13 @@ func (t *MainTab) View() tea.View {
 
 	t.renderViewport(t.w, t.h-lipgloss.Height(renderedTable), renderedList)
 
+	key := "--- " + lipgloss.NewStyle().Foreground(lipgloss.Blue).Render("Journal") + " "
+	hr := lipgloss.NewStyle().Width(t.w).Render(key + strings.Repeat("-", max(0, t.w-lipgloss.Width(key))))
+
 	v.SetContent(lipgloss.JoinVertical(
 		lipgloss.Top,
 		renderedTable,
+		hr,
 		t.viewport.View(),
 	))
 
