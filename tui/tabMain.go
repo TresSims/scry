@@ -46,17 +46,60 @@ func (t *MainTab) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (t *MainTab) View() tea.View {
 	var v tea.View
 
-	table := table.New().
-		Row(fmt.Sprintf("hostname: %s", t.f["hostname"]), fmt.Sprintf("connectivity: %t", t.f["connectivity"])).
-		Width(t.w)
-
-	renderedTable := table.Render()
-
 	var (
 		renderedList string
 		logList      []facts.SyslogLine
 		ok           bool
+		netInfo      facts.NetInfo
+		cpuInfo      facts.CPUInfo
+		memInfo      facts.MemInfo
 	)
+
+	netInfo, ok = t.f["netInfo"].(facts.NetInfo)
+	if !ok {
+		netInfo = facts.NetInfo{
+			Rx: -1,
+			Tx: -1,
+		}
+	}
+
+	cpuInfo, ok = t.f["cpuInfo"].(facts.CPUInfo)
+	if !ok {
+		cpuInfo = facts.CPUInfo{
+			Name:  "unknown",
+			Cores: -1,
+			Clock: -1.0,
+		}
+	}
+
+	memInfo, ok = t.f["memInfo"].(facts.MemInfo)
+	if !ok {
+		memInfo = facts.MemInfo{
+			Free:  "-1",
+			Total: "-1",
+		}
+	}
+
+	table := table.New().
+		Row("Host Info", "System Info", "Network Info").
+		Row(
+			fmt.Sprintf("hostname: %s", t.f["hostname"]),
+			fmt.Sprintf("%s: %d cores at %f", cpuInfo.Name, cpuInfo.Cores, cpuInfo.Clock),
+			fmt.Sprintf("%s", t.f["ip"]),
+		).
+		Row(
+			fmt.Sprintf("uptime: %s", t.f["uptime"]),
+			fmt.Sprintf("Total: %s, Free: %s", memInfo.Total, memInfo.Free),
+			fmt.Sprintf("connectivity: %t", t.f["conectivity"]),
+		).
+		Row(
+			fmt.Sprintf("%s", t.f["system"]),
+			fmt.Sprintf("Rx: %d / Tx: %d", netInfo.Rx, netInfo.Tx),
+			fmt.Sprintf("Scry Connections: %d", t.f["subscriptions"]),
+		).
+		Width(t.w)
+
+	renderedTable := table.Render()
 
 	logListUnknown := t.f["journal"]
 	if logList, ok = logListUnknown.([]facts.SyslogLine); !ok {
