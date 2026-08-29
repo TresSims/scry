@@ -17,4 +17,9 @@ var DefaultFacts map[string]Facter = map[string]Facter{
 	"hostname":     facts.HostnameFact,
 	"connectivity": facts.ConnectivityFact,
 	"journal":      facts.JournalctlFact,
+	"ip":           facts.DefaultIP,
+	"netInfo":      facts.Net,
+	"cpuInfo":      facts.CPU,
+	"system":       facts.System,
+	"uptime":       facts.Uptime,
 }
