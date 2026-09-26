@@ -2,30 +2,30 @@ package facts
 
 import (
 	"context"
-	"os"
-
-	"go.yaml.in/yaml/v3"
 )
 
 type CPUInfo struct {
-	Name  string  `yaml:"model name"`
-	Cores int     `yaml:"cpu cores"`
-	Clock float32 `yaml:"cpu MHz"`
+	Name  string  `proc:"model name"`
+	Cores int     `proc:"cpu cores"`
+	Clock float64 `proc:"cpu MHz"`
 }
 
+const (
+	key int = iota
+	val
+
+	cpuInfoPath = "/proc/cpuinfo"
+)
+
 func CPU(ctx context.Context, publish func(val any)) error {
-	cpubytes, err := os.ReadFile("/proc/cpuinfo")
-	if err != nil {
-		return err
-	}
-
 	cpuInfo := &CPUInfo{}
-	err = yaml.Unmarshal(cpubytes, cpuInfo)
+
+	err := ReadProcFileIntoStruct(cpuInfoPath, cpuInfo)
 	if err != nil {
 		return err
 	}
 
-	publish(cpuInfo)
+	publish(*cpuInfo)
 
 	return nil
 }

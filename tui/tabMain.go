@@ -55,7 +55,7 @@ func (t *MainTab) View() tea.View {
 		memInfo      facts.MemInfo
 	)
 
-	netInfo, ok = t.f["netInfo"].(facts.NetInfo)
+	netInfo, ok = t.f[facter.NetInfoKey].(facts.NetInfo)
 	if !ok {
 		netInfo = facts.NetInfo{
 			Rx: -1,
@@ -63,7 +63,7 @@ func (t *MainTab) View() tea.View {
 		}
 	}
 
-	cpuInfo, ok = t.f["cpuInfo"].(facts.CPUInfo)
+	cpuInfo, ok = t.f[facter.CpuInfoKey].(facts.CPUInfo)
 	if !ok {
 		cpuInfo = facts.CPUInfo{
 			Name:  "unknown",
@@ -72,7 +72,7 @@ func (t *MainTab) View() tea.View {
 		}
 	}
 
-	memInfo, ok = t.f["memInfo"].(facts.MemInfo)
+	memInfo, ok = t.f[facter.MemInfoKey].(facts.MemInfo)
 	if !ok {
 		memInfo = facts.MemInfo{
 			Free:  "-1",
@@ -83,25 +83,25 @@ func (t *MainTab) View() tea.View {
 	table := table.New().
 		Row("Host Info", "System Info", "Network Info").
 		Row(
-			fmt.Sprintf("hostname: %s", t.f["hostname"]),
+			fmt.Sprintf("hostname: %s", t.f[facter.HostnameKey]),
 			fmt.Sprintf("%s: %d cores at %f", cpuInfo.Name, cpuInfo.Cores, cpuInfo.Clock),
-			fmt.Sprintf("%s", t.f["ip"]),
+			fmt.Sprintf("%s", t.f[facter.IpKey]),
 		).
 		Row(
-			fmt.Sprintf("uptime: %s", t.f["uptime"]),
+			fmt.Sprintf("uptime: %s", t.f[facter.UptimeKey]),
 			fmt.Sprintf("Total: %s, Free: %s", memInfo.Total, memInfo.Free),
-			fmt.Sprintf("connectivity: %t", t.f["conectivity"]),
+			fmt.Sprintf("connectivity: %t", t.f[facter.ConnectivityKey]),
 		).
 		Row(
-			fmt.Sprintf("%s", t.f["system"]),
+			fmt.Sprintf("%s", t.f[facter.SystemKey]),
 			fmt.Sprintf("Rx: %d / Tx: %d", netInfo.Rx, netInfo.Tx),
-			fmt.Sprintf("Scry Connections: %d", t.f["subscriptions"]),
+			fmt.Sprintf("Scry Connections: %d", t.f[facter.SubscriptionsKey]),
 		).
 		Width(t.w)
 
 	renderedTable := table.Render()
 
-	logListUnknown := t.f["journal"]
+	logListUnknown := t.f[facter.JournalKey]
 	if logList, ok = logListUnknown.([]facts.SyslogLine); !ok {
 		renderedList = "Error reading logList"
 	}

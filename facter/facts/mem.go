@@ -2,16 +2,15 @@ package facts
 
 import (
 	"context"
-	"os"
 	"time"
-
-	"go.yaml.in/yaml/v3"
 )
 
 type MemInfo struct {
-	Total string `yaml:"MemTotal"`
-	Free  string `yaml:"MemFree"`
+	Total string `proc:"MemTotal"`
+	Free  string `proc:"MemFree"`
 }
+
+const memInfoPath = "/proc/meminfo"
 
 func Mem(ctx context.Context, publish func(val any)) error {
 	timer := time.NewTicker(time.Second * 5)
@@ -19,18 +18,10 @@ func Mem(ctx context.Context, publish func(val any)) error {
 	for {
 		select {
 		case <-timer.C:
-			membytes, err := os.ReadFile("/proc/meminfo")
-			if err != nil {
-				return err
-			}
-
 			memInfo := &MemInfo{}
-			err = yaml.Unmarshal(membytes, memInfo)
-			if err != nil {
-				return err
-			}
+			ReadProcFileIntoStruct(memInfoPath, memInfo)
 
-			publish(memInfo)
+			publish(*memInfo)
 		case <-ctx.Done():
 			return nil
 		}

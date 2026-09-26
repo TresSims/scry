@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const NetDevPath = "/proc/net/dev"
+
 type NetInfo struct {
 	Rx int
 	Tx int
@@ -21,7 +23,7 @@ func Net(ctx context.Context, publish func(val any)) error {
 	for {
 		select {
 		case <-timer.C:
-			netbytes, err := os.ReadFile("/proc/net/dev")
+			netbytes, err := os.ReadFile(NetDevPath)
 			if err != nil {
 				return err
 			}
@@ -31,7 +33,7 @@ func Net(ctx context.Context, publish func(val any)) error {
 				return err
 			}
 
-			publish(netInfo)
+			publish(*netInfo)
 		case <-ctx.Done():
 			return nil
 		}

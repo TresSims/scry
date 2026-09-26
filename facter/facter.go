@@ -6,6 +6,19 @@ import (
 	"github.com/TresSims/scry/facter/facts"
 )
 
+const (
+	HostnameKey      = "hostname"
+	ConnectivityKey  = "connectivity"
+	JournalKey       = "journal"
+	IpKey            = "ip"
+	NetInfoKey       = "netInfo"
+	CpuInfoKey       = "cpuInfo"
+	MemInfoKey       = "memInfo"
+	SystemKey        = "system"
+	UptimeKey        = "uptime"
+	SubscriptionsKey = "subscriptions"
+)
+
 // Facter interface is an interface for gathering facts about a system
 //
 // the mutex lock should be used before writing to the shared store.
@@ -14,13 +27,13 @@ import (
 type Facter func(ctx context.Context, publish func(val any)) error
 
 var DefaultFacts map[string]Facter = map[string]Facter{
-	"hostname":     facts.HostnameFact,
-	"connectivity": facts.ConnectivityFact,
-	"journal":      facts.JournalctlFact,
-	"ip":           facts.DefaultIP,
-	"netInfo":      facts.Net,
-	"cpuInfo":      facts.CPU,
-	"memInfo":      facts.Mem,
-	"system":       facts.System,
-	"uptime":       facts.Uptime,
+	HostnameKey:     facts.HostnameFact,
+	ConnectivityKey: facts.ConnectivityFact,
+	JournalKey:      facts.JournalctlFact,
+	IpKey:           facts.DefaultIP,
+	NetInfoKey:      facts.Net,
+	CpuInfoKey:      facts.CPU,
+	MemInfoKey:      facts.Mem,
+	SystemKey:       facts.System,
+	UptimeKey:       facts.Uptime,
 }

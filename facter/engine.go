@@ -3,6 +3,8 @@ package facter
 import (
 	"context"
 	"sync"
+
+	"charm.land/log/v2"
 )
 
 // Cache is a point-in-time copy of every cached fact, keyed the same way as
@@ -42,20 +44,26 @@ func NewEngine(facters map[string]Facter) *Engine {
 
 func (e *Engine) Collect(ctx context.Context) {
 	wg := sync.WaitGroup{}
+	log.Info("Starting fact collection")
 
 	for key, facter := range e.Facters {
 		wg.Go(func() {
-			facter(ctx, func(val any) {
+			log.Debug("Starting facter for " + key)
+			err := facter(ctx, func(val any) {
 				e.mux.Lock()
 				defer e.mux.Unlock()
 
 				e.Cache[key] = val
 				e.broadcast()
 			})
+			if err != nil {
+				log.Error("Facter for "+key+" failed", "error", err)
+			}
 		})
 	}
 
 	wg.Wait()
+	log.Info("Fact collection completed, no running facters")
 }
 
 // Subscribe returns a channel that receives a [Cache] after every collection
@@ -74,7 +82,7 @@ func (e *Engine) Subscribe() (<-chan Cache, func()) {
 
 	e.mux.Lock()
 	defer e.mux.Unlock()
-	e.Cache["subscriptions"] = len(e.subs)
+	e.Cache[SubscriptionsKey] = len(e.subs)
 
 	e.broadcast()
 	return ch, func() {
@@ -86,7 +94,7 @@ func (e *Engine) Subscribe() (<-chan Cache, func()) {
 
 			e.mux.Lock()
 			defer e.mux.Unlock()
-			e.Cache["subscriptions"] = len(e.subs)
+			e.Cache[SubscriptionsKey] = len(e.subs)
 		})
 	}
 }
