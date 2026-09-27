@@ -44,7 +44,7 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 	}
 
 	for _, entry := range entries {
-		log.Debug("Loading plugin " + entry.Name())
+		log.Debug("Trying to load plugin " + entry.Name())
 		// If it's a file, e.g. a plugin
 		if !entry.IsDir() {
 			plug, err := plugin.Open(filepath.Join(pluginDir, entry.Name()))
