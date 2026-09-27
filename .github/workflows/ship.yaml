@@ -48,7 +48,7 @@ jobs:
         uses: sigstore/cosign-installer@main
       - name: Sign Container
         run: |
-          cosign sign --yes $DOCKER_REPO@${{ steps.docker.outputs.digest }}
+          cosign sign --yes ${{ env.DOCKER_REPO }}@${{ steps.docker.outputs.digest }}
       - name: Push Latest
         uses: actions/github-script@v7
         with:
