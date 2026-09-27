@@ -1,0 +1,15 @@
+---
+name: Test
+on:  # yamllint disable-line rule:truthy
+  push:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
+      - name: Test
+        uses: robherley/go-test-action@v1
