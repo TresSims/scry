@@ -88,13 +88,13 @@ func (t *MainTab) View() tea.View {
 			fmt.Sprintf("%s", t.f[facter.IpKey]),
 		).
 		Row(
-			fmt.Sprintf("uptime: %s", t.f[facter.UptimeKey]),
-			fmt.Sprintf("Total: %s, Free: %s", memInfo.Total, memInfo.Free),
-			fmt.Sprintf("connectivity: %t", t.f[facter.ConnectivityKey]),
+			fmt.Sprintf("Uptime: %s", t.f[facter.UptimeKey]),
+			fmt.Sprintf("RAM Total: %s, Free: %s", memInfo.Total, memInfo.Free),
+			fmt.Sprintf("Connectivity: %t", t.f[facter.ConnectivityKey]),
 		).
 		Row(
 			fmt.Sprintf("%s", t.f[facter.SystemKey]),
-			fmt.Sprintf("Rx: %d / Tx: %d", netInfo.Rx, netInfo.Tx),
+			fmt.Sprintf("Network Rx: %d / Tx: %d", netInfo.Rx, netInfo.Tx),
 			fmt.Sprintf("Scry Connections: %d", t.f[facter.SubscriptionsKey]),
 		).
 		Width(t.w)
