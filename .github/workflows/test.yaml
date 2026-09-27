@@ -13,3 +13,5 @@ jobs:
         uses: actions/setup-go@v5
       - name: Test
         uses: robherley/go-test-action@v1
+        with:
+          cover: true
