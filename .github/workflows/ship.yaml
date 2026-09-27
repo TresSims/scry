@@ -23,7 +23,6 @@ jobs:
           token: ${{ github.token }}
           branch: main
           fallbackTag: 0.0.0
-          scopeList: manifests
       - name: Install Cosign
         uses: sigstore/cosign-installer@main
       - name: Login to GHCR
