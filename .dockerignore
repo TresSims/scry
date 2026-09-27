@@ -1,0 +1,9 @@
+.github/
+.git/
+plugins/
+examples/
+testdata/
+tools/
+.env*
+.gitignore
+*.md
