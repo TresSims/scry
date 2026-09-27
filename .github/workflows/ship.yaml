@@ -10,6 +10,9 @@ permissions:
   packages: write
   id-token: write
 
+env:
+  DOCKER_REPO: "ghcr.io/tressims/scry"
+
 jobs:
   scry:
     runs-on: ubuntu-latest
@@ -39,4 +42,6 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          tags: tsims/scry:${{ steps.semver.outputs.next }}
+          tags: |
+            $DOCKER_REPO:${{ steps.semver.outputs.next }}
+            $DOCKER_REPO:latest
