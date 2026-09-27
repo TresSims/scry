@@ -30,6 +30,7 @@ func ConfigureFlags(cmd *cobra.Command) {
 			cmd.PersistentFlags().IntP(key, shortKey, valInt, helpText)
 		}
 
+		// nolint:errcheck // best effort
 		singleton.BindPFlag(key, cmd.PersistentFlags().Lookup(key))
 	}
 }

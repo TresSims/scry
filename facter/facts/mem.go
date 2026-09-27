@@ -19,7 +19,10 @@ func Mem(ctx context.Context, publish func(val any)) error {
 		select {
 		case <-timer.C:
 			memInfo := &MemInfo{}
-			ReadProcFileIntoStruct(memInfoPath, memInfo)
+			err := ReadProcFileIntoStruct(memInfoPath, memInfo)
+			if err != nil {
+				return err
+			}
 
 			publish(*memInfo)
 		case <-ctx.Done():

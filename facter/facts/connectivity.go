@@ -17,7 +17,13 @@ func ConnectivityFact(ctx context.Context, publish func(val any)) error {
 			if err != nil {
 				publish(false)
 			}
-			defer conn.Close()
+			// Don't continue dialing if we can't close existing connections
+			err = conn.Close()
+			if err != nil {
+				publish(false)
+
+				return err
+			}
 
 			publish(true)
 		case <-ctx.Done():
