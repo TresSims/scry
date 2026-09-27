@@ -40,4 +40,4 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
-          tags: ${{ steps.semver.outputs.next }}
+          tags: tsims/scry:${{ steps.semver.outputs.next }}
