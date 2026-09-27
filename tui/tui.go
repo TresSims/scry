@@ -64,7 +64,7 @@ func WithTab(t Tab) Option {
 	}
 }
 
-func (_ Model) Init() tea.Cmd {
+func (Model) Init() tea.Cmd {
 	return nil
 }
 
