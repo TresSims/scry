@@ -1,3 +1,4 @@
+[![Test](https://github.com/TresSims/scry/actions/workflows/test.yaml/badge.svg)](https://github.com/TresSims/scry/actions/workflows/test.yaml)
 # Scry
 
 Scry serves a server health dashboard over ssh. 
