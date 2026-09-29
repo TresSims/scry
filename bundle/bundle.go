@@ -38,6 +38,16 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 		Tabs:    []tui.Tab{},
 	}
 
+	fileInfo, err := os.Stat(pluginDir)
+	if err != nil {
+		return set, err
+	}
+
+	// If we're just pointing to a file, open it
+	if !fileInfo.IsDir() {
+		return loadPlugin(pluginDir, set)
+	}
+
 	entries, err := os.ReadDir(pluginDir)
 	if err != nil {
 		return set, err
@@ -47,37 +57,47 @@ func LoadPlugins(pluginDir string) (*PluginSet, error) {
 		log.Debug("Trying to load plugin " + entry.Name())
 		// If it's a file, e.g. a plugin
 		if !entry.IsDir() {
-			plug, err := plugin.Open(filepath.Join(pluginDir, entry.Name()))
+			// plugin set is pass by reference, so no need to get the value
+			_, err := loadPlugin(filepath.Join(pluginDir, entry.Name()), set)
 			if err != nil {
 				continue
-			}
-
-			symBundle, err := plug.Lookup("Bundle")
-			if err != nil {
-				continue
-			}
-
-			bundle, ok := symBundle.(Bundle)
-			if !ok {
-				continue
-			}
-
-			for k, v := range bundle.Facters() {
-				if _, ok := set.Facters[k]; ok {
-					log.Warn("Overwriting facter for " + k)
-				} else {
-					log.Info("Registering facter for " + k)
-				}
-
-				set.Facters[k] = v
-			}
-
-			for _, opt := range bundle.Tabs() {
-				set.Tabs = append(set.Tabs, opt)
-				log.Info("Adding new tab")
 			}
 		}
 	}
 
 	return set, nil
+}
+
+func loadPlugin(path string, ps *PluginSet) (*PluginSet, error) {
+	plug, err := plugin.Open(path)
+	if err != nil {
+		return ps, ErrNotASharedObject
+	}
+
+	symBundle, err := plug.Lookup("Bundle")
+	if err != nil {
+		return ps, ErrNoBundleSymbol
+	}
+
+	bundle, ok := symBundle.(Bundle)
+	if !ok {
+		return ps, ErrPluginDoesntContainBundle
+	}
+
+	for k, v := range bundle.Facters() {
+		if _, ok := ps.Facters[k]; ok {
+			log.Warn("Overwriting facter for " + k)
+		} else {
+			log.Info("Registering facter for " + k)
+		}
+
+		ps.Facters[k] = v
+	}
+
+	for _, opt := range bundle.Tabs() {
+		ps.Tabs = append(ps.Tabs, opt)
+		log.Info("Adding new tab")
+	}
+
+	return ps, nil
 }
