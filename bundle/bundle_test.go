@@ -12,7 +12,7 @@ import (
 // TestLoadPluginsEmptyDir makes sure that the system does not
 // fail when loading an empty directory with no plugins
 func TestLoadPluginsEmptyDir(t *testing.T) {
-	ps, err := LoadPlugins("../testdata/bundle/empty_dir/")
+	ps, err := LoadPlugins("testdata/bundle/empty_dir/")
 	if err != nil {
 		t.Error("Empty dir returned error")
 	}
@@ -30,7 +30,7 @@ func TestLoadPluginsNoSuchDir(t *testing.T) {
 }
 
 func TestLoadPluginsFileNotPlugin(t *testing.T) {
-	ps, err := LoadPlugins("../testdata/bundle/empty_dir/.gitkeep")
+	ps, err := LoadPlugins("testdata/bundle/empty_dir/.gitkeep")
 	if !errors.Is(err, ErrNotASharedObject) {
 		t.Error("Failed reading a file, not a dir")
 	}
@@ -39,7 +39,7 @@ func TestLoadPluginsFileNotPlugin(t *testing.T) {
 }
 
 func TestLoadPluginWithBadBundle(t *testing.T) {
-	ps, err := LoadPlugins("../testdata/bundle/generated/badBundleObject.so")
+	ps, err := LoadPlugins("testdata/bundle/generated/badBundleObject.so")
 	if !errors.Is(err, ErrPluginDoesntContainBundle) {
 		t.Errorf("Unexpected error %s", err)
 	}
@@ -48,7 +48,7 @@ func TestLoadPluginWithBadBundle(t *testing.T) {
 }
 
 func TestLoadPluginWithoutBundle(t *testing.T) {
-	ps, err := LoadPlugins("../testdata/bundle/generated/noBundleObject.so")
+	ps, err := LoadPlugins("testdata/bundle/generated/noBundleObject.so")
 	if !errors.Is(err, ErrNoBundleSymbol) {
 		t.Errorf("Unexpected error %s", err)
 	}
@@ -57,7 +57,7 @@ func TestLoadPluginWithoutBundle(t *testing.T) {
 }
 
 func TestLoadPluginWithFacters(t *testing.T) {
-	ps, err := LoadPlugins("../plugins/time.so")
+	ps, err := LoadPlugins("plugins/time.so")
 	if err != nil {
 		t.Errorf("Good Plugin didn't load")
 	}
