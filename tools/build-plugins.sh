@@ -2,10 +2,13 @@
 
 set -euo pipefail
 
-while getopts "i:o:" opt; do
+test_opts=""
+
+while getopts "i:o:t" opt; do
   case $opt in
     i) in_dir=$OPTARG;;
     o) out_dir=$OPTARG;;
+    t) test_opts="-cover -covermode=set -coverpkg=./..."
   esac
 done
 
@@ -15,7 +18,10 @@ mkdir -p "$out_dir"
 for dir in "$in_dir"/*/; do
   name="$(basename "$dir")"
   echo "Building $name..."
-  go build -C "$repo_root" -buildmode=plugin -o "$out_dir/$name.so" "$in_dir/$name"
+  go build -C "$repo_root" \
+    -buildmode=plugin -o "$out_dir/$name.so" \
+    $test_opts \
+    "$in_dir/$name"
 done
 
 echo $out_dir
