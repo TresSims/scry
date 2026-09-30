@@ -1,4 +1,4 @@
-[![Test](https://github.com/TresSims/scry/actions/workflows/test.yaml/badge.svg)](https://github.com/TresSims/scry/actions/workflows/test.yaml)
+[![Ship](https://github.com/TresSims/scry/actions/workflows/ship.yaml/badge.svg)](https://github.com/TresSims/scry/actions/workflows/ship.yaml)
 ![Codecov](https://img.shields.io/codecov/c/github/tressims/scry)
 # Scry
 
