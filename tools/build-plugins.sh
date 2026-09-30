@@ -2,15 +2,22 @@
 
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-out_dir="$repo_root/plugins/"
+while getopts "i:o:" opt; do
+  case $opt in
+    i) in_dir=$OPTARG;;
+    o) out_dir=$OPTARG;;
+  esac
+done
 
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 mkdir -p "$out_dir"
 
-for dir in "$repo_root"/examples/*/; do
-	name="$(basename "$dir")"
-	echo "Building $name..."
-	go build -C "$repo_root" -buildmode=plugin -o "$out_dir/$name.so" "./examples/$name"
+for dir in "$in_dir"/*/; do
+  name="$(basename "$dir")"
+  echo "Building $name..."
+  go build -C "$repo_root" -buildmode=plugin -o "$out_dir"/$name.so "$in_dir/$name"
 done
+
+ls $out_dir
 
 echo "Done. Plugins written to $out_dir"
