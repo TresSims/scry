@@ -18,6 +18,7 @@ for dir in "$in_dir"/*/; do
   go build -C "$repo_root" -buildmode=plugin -o "$out_dir"/$name.so "$in_dir/$name"
 done
 
+echo $out_dir
 ls $out_dir
 
 echo "Done. Plugins written to $out_dir"

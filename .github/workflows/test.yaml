@@ -13,12 +13,12 @@ jobs:
         uses: actions/setup-go@v5
       - name: Generate Test Data
         run: |
+          ./toos/build-plugins.sh \
+            -i $(realpath ./examples/) \
+            -o $(realpath ./plugins/)
           ./tools/build-plugins.sh \
-            -i ./examples/ \
-            -o ./plugins/
-          ./tools/build-plugins.sh \
-            -i ./testdata/bundle/bad_plugins/ \
-            -o ./testdata/generated/
+            -i $(realpath ./testdata/bundle/bad_plugins/) \
+            -o $(realpath ./testdata/generated/)
       - name: Test
         run: |
           go test ./... -coverprofile=coverage.txt
