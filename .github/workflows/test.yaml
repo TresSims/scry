@@ -13,7 +13,7 @@ jobs:
         uses: actions/setup-go@v5
       - name: Generate Test Data
         run: |
-          ./toos/build-plugins.sh \
+          ./tools/build-plugins.sh \
             -i $(realpath ./examples/) \
             -o $(realpath ./plugins/)
           ./tools/build-plugins.sh \
