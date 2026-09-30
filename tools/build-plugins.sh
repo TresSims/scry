@@ -15,7 +15,7 @@ mkdir -p "$out_dir"
 for dir in "$in_dir"/*/; do
   name="$(basename "$dir")"
   echo "Building $name..."
-  go build -C "$repo_root" -buildmode=plugin -o "$out_dir"/$name.so "$in_dir/$name"
+  go build -C "$repo_root" -buildmode=plugin -o "$out_dir/$name.so" "$in_dir/$name"
 done
 
 echo $out_dir
