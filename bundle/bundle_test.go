@@ -59,7 +59,9 @@ func TestLoadPluginWithoutBundle(t *testing.T) {
 func TestLoadPluginWithFacters(t *testing.T) {
 	ps, err := LoadPlugins("../plugins/time.so")
 	if err != nil {
-		t.Errorf("Good Plugin didn't load")
+		t.Errorf("Good Plugin didn't load: %s", err)
+
+		return
 	}
 
 	if len(ps.Facters) == 0 {
@@ -70,7 +72,9 @@ func TestLoadPluginWithFacters(t *testing.T) {
 func TestLoadPluginWithTabs(t *testing.T) {
 	ps, err := LoadPlugins("../plugins/time.so")
 	if err != nil {
-		t.Errorf("Good Plugin didn't load")
+		t.Errorf("Good Plugin didn't load: %s", err)
+
+		return
 	}
 
 	if len(ps.Tabs) == 0 {
