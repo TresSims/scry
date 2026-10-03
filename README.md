@@ -1,5 +1,6 @@
 [![Ship](https://github.com/TresSims/scry/actions/workflows/ship.yaml/badge.svg)](https://github.com/TresSims/scry/actions/workflows/ship.yaml)
 ![Codecov](https://img.shields.io/codecov/c/github/tressims/scry)
+
 # Scry
 
 Scry serves a server health dashboard over ssh. 
