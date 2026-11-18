@@ -24,6 +24,6 @@ jobs:
           go test ./... \
             -covermode=set -coverpkg=./... -coverprofile=coverage.txt
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
